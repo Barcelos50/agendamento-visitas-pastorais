@@ -181,4 +181,8 @@ renderDayVisits(dateKey) {
 closePastorModal() {
     document.getElementById('pastor-modal').style.display = 'none';
     this.selectedPastorTimes = [];
-}
+// Funções globais adicionais para o pastor
+function openPastorModal(date) { app.openPastorModal(date); }
+function closePastorModal() { app.closePastorModal(); }
+function togglePastorTime(time) { app.togglePastorTime(time); }
+function releaseSelectedTimes() { app.releaseSelectedTimes(); }}
