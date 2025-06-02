@@ -8,15 +8,917 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Visitas Pastorais">
-    <link rel="manifest" href="./manifest.json">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23667eea'/%3E%3Ctext x='90' y='120' font-size='72' text-anchor='middle' fill='white'%3E✝️%3C/text%3E%3C/svg%3E">
-    
-    <!-- APIs Externas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
-    
     <title>Agendamento de Visitas Pastorais - Igreja Adventista do Sétimo Dia</title>
-    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .panel-selector {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .panel-btn {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .panel-btn.active {
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .panel-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+        }
+
+        .panel {
+            display: none;
+            padding: 30px;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* Login do Pastor */
+        .pastor-login {
+            text-align: center;
+            padding: 50px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .pastor-login h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .password-input {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1.1em;
+            margin: 10px;
+            width: 300px;
+            max-width: 100%;
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: 600;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .calendar-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .calendar-day:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calendar-day.has-visits {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .calendar-day.has-available {
+            background: #17a2b8;
+            color: white;
+            border-color: #17a2b8;
+        }
+
+        .calendar-day.has-both {
+            background: linear-gradient(45deg, #17a2b8 50%, #28a745 50%);
+            color: white;
+            border-color: #28a745;
+        }
+
+        /* Legenda do Pastor */
+        .pastor-legend {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .pastor-legend h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #dee2e6;
+        }
+
+        .legend-color.available {
+            background: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .legend-color.booked {
+            background: #28a745;
+            border-color: #28a745;
+        }
+
+        .legend-color.both {
+            background: linear-gradient(45deg, #17a2b8 50%, #28a745 50%);
+            border-color: #28a745;
+        }
+
+        .legend-text {
+            font-size: 0.9em;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        /* Modal/Janela dos Horários */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .modal-header h3 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close:hover {
+            background: #c82333;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .time-slot {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .time-slot:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .time-slot.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .time-slot.occupied {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            cursor: not-allowed;
+        }
+
+        .time-slot.available {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .form-group {
+            margin: 20px 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* Lista de Visitas Agendadas */
+        .all-visits {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .all-visits h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .visit-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .visit-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .visit-date {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .visit-time {
+            font-weight: 600;
+            color: #28a745;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .visit-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .contact-btn {
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+        }
+
+        .phone-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .maps-btn {
+            background: #EA4335;
+            color: white;
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .month-nav button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .month-nav h3 {
+            color: #2c3e50;
+            font-size: 1.5em;
+        }
+
+        .no-visits {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 30px;
+        }
+
+        /* Responsividade Mobile Completa */
+        @media (max-width: 768px) {
+            body { 
+                padding: 5px; 
+                font-size: 14px;
+            }
+            
+            .container { 
+                margin: 0; 
+                border-radius: 10px; 
+                min-height: calc(100vh - 10px);
+            }
+            
+            .header { 
+                padding: 15px 10px; 
+                text-align: center;
+            }
+            
+            .header h1 { 
+                font-size: 1.5em; 
+                margin-bottom: 5px;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 0.9em;
+            }
+            
+            .panel-selector { 
+                flex-direction: row;
+                overflow-x: auto;
+            }
+            
+            .panel-btn { 
+                padding: 12px 8px; 
+                font-size: 0.9em;
+                min-width: 50%;
+                white-space: nowrap;
+            }
+            
+            .panel { 
+                padding: 15px 10px; 
+            }
+            
+            .month-nav {
+                margin: 10px 0;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+            
+            .month-nav h3 {
+                font-size: 1.1em;
+                width: 100%;
+                text-align: center;
+                order: -1;
+                margin-bottom: 8px;
+            }
+            
+            .month-nav button {
+                padding: 8px 12px;
+                font-size: 0.8em;
+                flex: 1;
+                min-width: 100px;
+                max-width: 120px;
+            }
+            
+            .calendar { 
+                gap: 3px; 
+                padding: 10px; 
+                margin: 10px 0;
+            }
+            
+            .calendar-header {
+                padding: 6px 2px;
+                font-size: 0.7em;
+                font-weight: 600;
+            }
+            
+            .calendar-day { 
+                min-height: 28px; 
+                font-size: 0.8em;
+                padding: 2px;
+                border-width: 1px;
+            }
+            
+            .time-slots { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 6px;
+                margin: 10px 0;
+            }
+            
+            .time-slot {
+                padding: 8px 4px;
+                font-size: 0.8em;
+                border-width: 1px;
+            }
+            
+            .modal {
+                padding: 10px;
+            }
+            
+            .modal-content { 
+                width: calc(100% - 20px); 
+                margin: 20px auto;
+                padding: 15px 10px;
+                max-height: calc(100vh - 40px);
+                border-radius: 10px;
+            }
+            
+            .modal-header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .modal-header h3 {
+                font-size: 1em;
+                flex: 1;
+                min-width: 200px;
+            }
+            
+            .close {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+            
+            .form-group {
+                margin: 12px 0;
+            }
+            
+            .form-group input, 
+            .form-group textarea {
+                padding: 10px;
+                font-size: 16px; /* Evita zoom no iOS */
+                border-width: 1px;
+            }
+            
+            .form-group label {
+                font-size: 0.9em;
+                margin-bottom: 5px;
+            }
+            
+            .btn { 
+                width: 100%; 
+                margin: 6px 0;
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+            
+            .btn-secondary {
+                margin-left: 0;
+                margin-top: 8px;
+            }
+            
+            .pastor-login {
+                padding: 20px 10px;
+                margin: 10px 0;
+            }
+            
+            .password-input {
+                width: 100%;
+                max-width: 280px;
+                padding: 12px;
+                font-size: 16px; /* Evita zoom no iOS */
+            }
+            
+            .login-btn {
+                width: 100%;
+                max-width: 280px;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .pastor-legend {
+                padding: 12px;
+                margin: 10px 0;
+            }
+            
+            .pastor-legend h4 {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+            
+            .legend-items {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .legend-item {
+                gap: 8px;
+                align-items: flex-start;
+            }
+            
+            .legend-color {
+                width: 16px;
+                height: 16px;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
+            
+            .legend-text {
+                font-size: 0.8em;
+                line-height: 1.3;
+            }
+            
+            .all-visits {
+                padding: 12px;
+                margin: 10px 0;
+            }
+            
+            .all-visits h3 {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+            
+            .all-visits > div:first-child {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch !important;
+            }
+            
+            .all-visits > div:first-child > div {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                justify-content: center;
+            }
+            
+            .all-visits > div:first-child > div > .btn {
+                flex: 1;
+                min-width: 80px;
+                padding: 6px 8px;
+                font-size: 0.8em;
+                margin: 2px;
+            }
+            
+            .visit-card {
+                padding: 12px;
+                margin: 8px 0;
+                border-radius: 10px;
+            }
+            
+            .visit-info {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 10px 0;
+            }
+            
+            .visit-date {
+                padding: 6px 10px;
+                font-size: 0.8em;
+                margin-bottom: 8px;
+                display: inline-block;
+            }
+            
+            .visit-time {
+                font-size: 1em;
+                margin-bottom: 8px;
+            }
+            
+            .contact-btn {
+                display: block;
+                margin: 3px 0;
+                padding: 8px 12px;
+                font-size: 0.8em;
+                text-align: center;
+                border-radius: 6px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .no-visits {
+                padding: 20px 10px;
+                font-size: 0.9em;
+                line-height: 1.4;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 3px;
+                font-size: 13px;
+            }
+            
+            .header h1 {
+                font-size: 1.3em;
+            }
+            
+            .header p {
+                font-size: 0.8em;
+            }
+            
+            .panel {
+                padding: 10px 8px;
+            }
+            
+            .calendar-day {
+                min-height: 25px;
+                font-size: 0.75em;
+            }
+            
+            .calendar-header {
+                padding: 4px 1px;
+                font-size: 0.65em;
+            }
+            
+            .time-slots {
+                grid-template-columns: 1fr 1fr;
+                gap: 4px;
+            }
+            
+            .time-slot {
+                padding: 6px 3px;
+                font-size: 0.75em;
+            }
+            
+            .modal-content {
+                width: calc(100% - 10px);
+                margin: 10px auto;
+                padding: 12px 8px;
+                border-radius: 8px;
+            }
+            
+            .modal-header h3 {
+                font-size: 0.9em;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                padding: 8px;
+                font-size: 16px;
+            }
+            
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
+            
+            .contact-btn {
+                font-size: 0.75em;
+                padding: 6px 8px;
+            }
+            
+            .visit-card {
+                padding: 10px;
+            }
+            
+            .pastor-legend {
+                padding: 10px;
+            }
+            
+            .legend-text {
+                font-size: 0.75em;
+            }
+        }
+
+        /* Correções específicas para iOS */
+        @media (max-width: 768px) {
+            input[type="text"],
+            input[type="tel"],
+            input[type="password"],
+            textarea {
+                -webkit-appearance: none;
+                border-radius: 8px;
+                font-size: 16px !important; /* Previne zoom no iOS */
+            }
+            
+            .panel-btn {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .calendar-day {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .time-slot {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .btn {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -60,6 +962,32 @@
                     <h2>✝️ Pr. Carlos Barcelos</h2>
                     <button class="btn btn-secondary" onclick="logout()">Sair</button>
                 </div>
+                
+                <div class="pastor-legend">
+                    <h4>📊 Legenda do Calendário</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color available"></div>
+                            <span class="legend-text">Horários liberados (sem agendamentos)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color booked"></div>
+                            <span class="legend-text">Dias com visitas agendadas</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color both"></div>
+                            <span class="legend-text">Horários liberados + visitas agendadas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="month-nav">
+                    <button onclick="changePastorMonth(-1)">‹ Mês Anterior</button>
+                    <h3 id="pastor-current-month">Janeiro 2025</h3>
+                    <button onclick="changePastorMonth(1)">Próximo Mês ›</button>
+                </div>
+
+                <div id="pastor-calendar" class="calendar"></div>
 
                 <!-- Lista de Todas as Visitas Agendadas -->
                 <div class="all-visits">
@@ -94,7 +1022,7 @@
                     </div>
                     <div class="form-group">
                         <label for="member-phone">Telefone:</label>
-                        <input type="tel" id="member-phone" class="phone-mask" placeholder="55 0 0000-0000" required>
+                        <input type="tel" id="member-phone" placeholder="55 0 0000-0000" required>
                     </div>
                     <div class="form-group">
                         <label for="member-address">Endereço Completo:</label>
@@ -105,22 +1033,675 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal para Pastor - Liberação de Horários -->
+        <div id="pastor-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Gerenciar Horários - <span id="pastor-selected-date"></span></h3>
+                    <button class="close" onclick="closePastorModal()">&times;</button>
+                </div>
+                
+                <h4>Selecione os horários para liberar:</h4>
+                <div id="pastor-time-slots" class="time-slots"></div>
+                
+                <div style="margin: 20px 0;">
+                    <button class="btn" onclick="releaseSelectedTimes()">Liberar Horários Selecionados</button>
+                    <button class="btn btn-secondary" onclick="closePastorModal()">Fechar</button>
+                </div>
+
+                <div id="day-visits">
+                    <h4>Visitas Agendadas neste Dia:</h4>
+                    <div id="day-visits-list"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Scripts Modulares -->
-    <script src="js/dateUtils.js"></script>
-    <script src="js/storageManager.js"></script>
-    <script src="js/app.js"></script>
-
-    <!-- Service Worker -->
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => console.log('SW registrado:', registration))
-                    .catch(error => console.log('Erro SW:', error));
-            });
+        // Configurações e dados globais
+        const PASTOR_PASSWORD = 'Carlos10';
+        let availableSlots = {};
+        let bookedVisits = {};
+        let currentMonth = new Date();
+        let pastorCurrentMonth = new Date();
+        let selectedDate = null;
+        let selectedTime = null;
+        let selectedPastorDate = null;
+        let selectedPastorTimes = [];
+        let pastorLoggedIn = false;
+
+        // Horários e constantes
+        const timeSlots = [
+            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+            '17:00', '17:30', '18:00', '18:30', '19:00', '19:30',
+            '20:00', '20:30', '21:00', '21:30'
+        ];
+
+        const months = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+
+        const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+        // Funções de data corrigidas
+        function createCleanDate(year, month, day) {
+            return new Date(year, month, day, 12, 0, 0, 0);
         }
+
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateDisplay(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function parseDateKey(dateKey) {
+            const [year, month, day] = dateKey.split('-').map(Number);
+            return createCleanDate(year, month - 1, day);
+        }
+
+        function getToday() {
+            const now = new Date();
+            return createCleanDate(now.getFullYear(), now.getMonth(), now.getDate());
+        }
+
+        // Armazenamento
+        function saveData() {
+            try {
+                const data = {
+                    availableSlots: availableSlots,
+                    bookedVisits: bookedVisits,
+                    lastUpdate: new Date().getTime()
+                };
+                
+                localStorage.setItem('visitasPastoraisCarlos', JSON.stringify(data));
+                sessionStorage.setItem('visitasPastoraisCarlos_session', JSON.stringify(data));
+                console.log('✅ Dados salvos!');
+                showSaveConfirmation();
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+            }
+        }
+
+        function loadData() {
+            try {
+                let data = localStorage.getItem('visitasPastoraisCarlos');
+                if (!data) {
+                    data = sessionStorage.getItem('visitasPastoraisCarlos_session');
+                }
+                
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    availableSlots = parsed.availableSlots || {};
+                    bookedVisits = parsed.bookedVisits || {};
+                    console.log('✅ Dados carregados!');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar:', error);
+            }
+        }
+
+        function showSaveConfirmation() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; background: #28a745;
+                color: white; padding: 10px 20px; border-radius: 8px; z-index: 9999;
+                font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            notification.textContent = '✅ Dados salvos!';
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 3000);
+        }
+
+        // Autenticação do pastor
+        function checkPassword() {
+            const password = document.getElementById('pastor-password').value;
+            if (password === PASTOR_PASSWORD) {
+                pastorLoggedIn = true;
+                document.getElementById('pastor-login').style.display = 'none';
+                document.getElementById('pastor-content').style.display = 'block';
+                renderPastorCalendar();
+                renderAllVisits();
+            } else {
+                alert('Senha incorreta! Tente novamente.');
+                document.getElementById('pastor-password').value = '';
+            }
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        }
+
+        function logout() {
+            pastorLoggedIn = false;
+            document.getElementById('pastor-login').style.display = 'block';
+            document.getElementById('pastor-content').style.display = 'none';
+            document.getElementById('pastor-password').value = '';
+        }
+
+        // Mudança de painéis
+        function showPanel(panel) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.panel-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(panel + '-panel').classList.add('active');
+            event.target.classList.add('active');
+            
+            if (panel === 'member') {
+                renderMemberCalendar();
+            } else if (pastorLoggedIn) {
+                renderPastorCalendar();
+                renderAllVisits();
+            }
+        }
+
+        // Renderização do calendário dos membros
+        function renderMemberCalendar() {
+            const calendar = document.getElementById('member-calendar');
+            const monthText = document.getElementById('current-month');
+            
+            monthText.textContent = `${months[currentMonth.getMonth()]} ${currentMonth.getFullYear()}`;
+            calendar.innerHTML = '';
+            
+            // Headers
+            weekDays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+            
+            // Days
+            const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = cellDate.getDate();
+                
+                const dateKey = formatDateKey(cellDate);
+                const today = getToday();
+                
+                if (cellDate.getMonth() !== currentMonth.getMonth()) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'default';
+                } else if (cellDate < today) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'default';
+                } else {
+                    if (availableSlots[dateKey] && availableSlots[dateKey].length > 0) {
+                        const hasAvailableSlots = availableSlots[dateKey].some(time => 
+                            !bookedVisits[dateKey] || !bookedVisits[dateKey][time]
+                        );
+                        if (hasAvailableSlots) {
+                            dayElement.classList.add('has-visits');
+                        }
+                    }
+                    
+                    dayElement.onclick = () => openMemberModal(cellDate);
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Renderização do calendário do pastor
+        function renderPastorCalendar() {
+            const calendar = document.getElementById('pastor-calendar');
+            const monthText = document.getElementById('pastor-current-month');
+            
+            monthText.textContent = `${months[pastorCurrentMonth.getMonth()]} ${pastorCurrentMonth.getFullYear()}`;
+            calendar.innerHTML = '';
+            
+            // Headers
+            weekDays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+            
+            // Days
+            const firstDay = new Date(pastorCurrentMonth.getFullYear(), pastorCurrentMonth.getMonth(), 1);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = cellDate.getDate();
+                
+                const dateKey = formatDateKey(cellDate);
+                const today = getToday();
+                
+                if (cellDate.getMonth() !== pastorCurrentMonth.getMonth()) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'default';
+                } else if (cellDate < today) {
+                    dayElement.style.opacity = '0.3';
+                    dayElement.style.cursor = 'default';
+                } else {
+                    // Aplicar cores baseadas no status
+                    const hasBookedVisits = bookedVisits[dateKey] && Object.keys(bookedVisits[dateKey]).length > 0;
+                    const hasAvailableSlots = availableSlots[dateKey] && availableSlots[dateKey].length > 0;
+                    const hasAvailableTime = hasAvailableSlots && availableSlots[dateKey].some(time => 
+                        !bookedVisits[dateKey] || !bookedVisits[dateKey][time]
+                    );
+                    
+                    if (hasBookedVisits && hasAvailableTime) {
+                        dayElement.classList.add('has-both');
+                    } else if (hasBookedVisits) {
+                        dayElement.classList.add('has-visits');
+                    } else if (hasAvailableTime) {
+                        dayElement.classList.add('has-available');
+                    }
+                    
+                    dayElement.onclick = () => openPastorModal(cellDate);
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // Modal do membro
+        function openMemberModal(date) {
+            selectedDate = createCleanDate(date.getFullYear(), date.getMonth(), date.getDate());
+            const dateKey = formatDateKey(selectedDate);
+            
+            document.getElementById('member-modal').style.display = 'block';
+            document.getElementById('member-selected-date').textContent = formatDateDisplay(selectedDate);
+            
+            const timeSlotsContainer = document.getElementById('member-time-slots');
+            timeSlotsContainer.innerHTML = '';
+            
+            if (availableSlots[dateKey] && availableSlots[dateKey].length > 0) {
+                availableSlots[dateKey].forEach(time => {
+                    if (!bookedVisits[dateKey] || !bookedVisits[dateKey][time]) {
+                        const timeElement = document.createElement('div');
+                        timeElement.className = 'time-slot';
+                        timeElement.textContent = time;
+                        timeElement.onclick = () => selectMemberTime(time);
+                        timeSlotsContainer.appendChild(timeElement);
+                    }
+                });
+                
+                if (timeSlotsContainer.children.length === 0) {
+                    timeSlotsContainer.innerHTML = '<div class="no-visits">Todos os horários estão ocupados para esta data.</div>';
+                }
+            } else {
+                timeSlotsContainer.innerHTML = '<div class="no-visits">Nenhum horário disponível para esta data.</div>';
+            }
+        }
+
+        function selectMemberTime(time) {
+            selectedTime = time;
+            document.querySelectorAll('#member-time-slots .time-slot').forEach(t => t.classList.remove('selected'));
+            event.target.classList.add('selected');
+            document.getElementById('member-booking-form').style.display = 'block';
+        }
+
+        function closeMemberModal() {
+            document.getElementById('member-modal').style.display = 'none';
+            document.getElementById('member-booking-form').style.display = 'none';
+            clearMemberForm();
+        }
+
+        function clearMemberForm() {
+            document.getElementById('member-name').value = '';
+            document.getElementById('member-phone').value = '';
+            document.getElementById('member-address').value = '';
+            selectedTime = null;
+        }
+
+        function cancelBooking() {
+            closeMemberModal();
+        }
+
+        // Confirmação de agendamento
+        function confirmBooking() {
+            const name = document.getElementById('member-name').value;
+            const phone = document.getElementById('member-phone').value;
+            const address = document.getElementById('member-address').value;
+            
+            if (!name || !phone || !address) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            const dateKey = formatDateKey(selectedDate);
+            
+            if (!bookedVisits[dateKey]) {
+                bookedVisits[dateKey] = {};
+            }
+            
+            bookedVisits[dateKey][selectedTime] = {
+                name: name,
+                phone: phone,
+                address: address,
+                dataAgendamento: new Date().toLocaleString('pt-BR')
+            };
+            
+            saveData();
+            closeMemberModal();
+            showBookingConfirmation();
+            renderMemberCalendar();
+            
+            if (pastorLoggedIn) {
+                renderAllVisits();
+            }
+        }
+
+        function showBookingConfirmation() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5); z-index: 10000;
+                display: flex; align-items: center; justify-content: center;
+            `;
+            
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: white; padding: 30px; border-radius: 15px;
+                text-align: center; max-width: 400px; margin: 20px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            `;
+            
+            const displayDate = formatDateDisplay(selectedDate);
+            
+            content.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 20px;">✅</div>
+                <h3 style="color: #28a745; margin-bottom: 15px;">Visita Agendada com Sucesso!</h3>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin-bottom: 10px;"><strong>📅 Data:</strong> ${displayDate}</p>
+                    <p style="margin-bottom: 10px;"><strong>🕐 Horário:</strong> ${selectedTime}</p>
+                </div>
+                <p style="color: #666; margin-bottom: 25px;">
+                    Pr. Carlos Barcelos entrará em contato em breve para confirmar os detalhes da visita.
+                </p>
+                <button onclick="closeBookingModal()" style="
+                    background: #28a745; color: white; border: none;
+                    padding: 12px 30px; border-radius: 8px; font-size: 16px;
+                    cursor: pointer; font-weight: 600;
+                ">Entendi</button>
+            `;
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+            window.currentBookingModal = modal;
+        }
+
+        function closeBookingModal() {
+            if (window.currentBookingModal) {
+                document.body.removeChild(window.currentBookingModal);
+                window.currentBookingModal = null;
+            }
+        }
+
+        // Modal do pastor
+        function openPastorModal(date) {
+            selectedPastorDate = date;
+            selectedPastorTimes = [];
+            const dateKey = formatDateKey(date);
+            
+            document.getElementById('pastor-modal').style.display = 'block';
+            document.getElementById('pastor-selected-date').textContent = formatDateDisplay(date);
+            
+            const timeSlotsContainer = document.getElementById('pastor-time-slots');
+            timeSlotsContainer.innerHTML = '';
+            
+            timeSlots.forEach(time => {
+                const timeElement = document.createElement('div');
+                timeElement.className = 'time-slot';
+                timeElement.textContent = time;
+                
+                if (availableSlots[dateKey] && availableSlots[dateKey].includes(time)) {
+                    timeElement.classList.add('available');
+                    timeElement.textContent += ' ✓';
+                }
+                
+                if (bookedVisits[dateKey] && bookedVisits[dateKey][time]) {
+                    timeElement.classList.add('occupied');
+                    timeElement.textContent = time + ' (Ocupado)';
+                } else {
+                    timeElement.onclick = () => togglePastorTime(time);
+                }
+                
+                timeSlotsContainer.appendChild(timeElement);
+            });
+            
+            renderDayVisits(dateKey);
+        }
+
+        function togglePastorTime(time) {
+            const index = selectedPastorTimes.indexOf(time);
+            if (index > -1) {
+                selectedPastorTimes.splice(index, 1);
+                event.target.classList.remove('selected');
+            } else {
+                selectedPastorTimes.push(time);
+                event.target.classList.add('selected');
+            }
+        }
+
+        function releaseSelectedTimes() {
+            if (!selectedPastorDate || selectedPastorTimes.length === 0) {
+                alert('Selecione pelo menos um horário para liberar.');
+                return;
+            }
+            
+            const dateKey = formatDateKey(selectedPastorDate);
+            if (!availableSlots[dateKey]) {
+                availableSlots[dateKey] = [];
+            }
+            
+            selectedPastorTimes.forEach(time => {
+                if (!availableSlots[dateKey].includes(time)) {
+                    availableSlots[dateKey].push(time);
+                }
+            });
+            
+            saveData();
+            selectedPastorTimes = [];
+            openPastorModal(selectedPastorDate);
+            renderPastorCalendar();
+            
+            alert('✅ Horários liberados com sucesso!');
+        }
+
+        function closePastorModal() {
+            document.getElementById('pastor-modal').style.display = 'none';
+            selectedPastorTimes = [];
+        }
+
+        function renderDayVisits(dateKey) {
+            const visitsList = document.getElementById('day-visits-list');
+            visitsList.innerHTML = '';
+            
+            if (bookedVisits[dateKey] && Object.keys(bookedVisits[dateKey]).length > 0) {
+                Object.keys(bookedVisits[dateKey]).forEach(time => {
+                    const visit = bookedVisits[dateKey][time];
+                    const visitCard = document.createElement('div');
+                    visitCard.className = 'visit-card';
+                    
+                    visitCard.innerHTML = `
+                        <div class="visit-time">${time}</div>
+                        <div class="visit-info">
+                            <div><strong>Nome:</strong> ${visit.name}</div>
+                            <div><strong>Telefone:</strong> ${visit.phone}</div>
+                        </div>
+                        <div><strong>Endereço:</strong> ${visit.address}</div>
+                        <div style="margin-top: 15px;">
+                            <a href="tel:${visit.phone}" class="contact-btn phone-btn">📞 Ligar</a>
+                            <a href="https://wa.me/55${visit.phone.replace(/\D/g, '')}" class="contact-btn whatsapp-btn" target="_blank">💬 WhatsApp</a>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(visit.address)}" class="contact-btn maps-btn" target="_blank">🗺️ Ver no Mapa</a>
+                        </div>
+                    `;
+                    
+                    visitsList.appendChild(visitCard);
+                });
+            } else {
+                visitsList.innerHTML = '<div class="no-visits">Nenhuma visita agendada para este dia.</div>';
+            }
+        }
+
+        // Renderizar todas as visitas
+        function renderAllVisits() {
+            const allVisitsList = document.getElementById('all-visits-list');
+            allVisitsList.innerHTML = '';
+            
+            const allVisits = [];
+            
+            Object.keys(bookedVisits).forEach(dateKey => {
+                Object.keys(bookedVisits[dateKey]).forEach(time => {
+                    const visit = bookedVisits[dateKey][time];
+                    allVisits.push({
+                        date: dateKey,
+                        time: time,
+                        ...visit
+                    });
+                });
+            });
+            
+            // Ordenar por data e hora
+            allVisits.sort((a, b) => {
+                const dateA = parseDateKey(a.date);
+                const dateB = parseDateKey(b.date);
+                
+                if (dateA.getTime() === dateB.getTime()) {
+                    return a.time.localeCompare(b.time);
+                }
+                
+                return dateA.getTime() - dateB.getTime();
+            });
+            
+            if (allVisits.length > 0) {
+                allVisits.forEach(visit => {
+                    const visitCard = document.createElement('div');
+                    visitCard.className = 'visit-card';
+                    
+                    const visitDate = parseDateKey(visit.date);
+                    const formattedDate = formatDateDisplay(visitDate);
+                    
+                    visitCard.innerHTML = `
+                        <div class="visit-date">${formattedDate}</div>
+                        <div class="visit-time">${visit.time}</div>
+                        <div class="visit-info">
+                            <div><strong>Nome:</strong> ${visit.name}</div>
+                            <div><strong>Telefone:</strong> ${visit.phone}</div>
+                        </div>
+                        <div><strong>Endereço:</strong> ${visit.address}</div>
+                        <div style="margin-top: 15px;">
+                            <a href="tel:${visit.phone}" class="contact-btn phone-btn">📞 Ligar</a>
+                            <a href="https://wa.me/55${visit.phone.replace(/\D/g, '')}" class="contact-btn whatsapp-btn" target="_blank">💬 WhatsApp</a>
+                            <a href="https://maps.google.com/?q=${encodeURIComponent(visit.address)}" class="contact-btn maps-btn" target="_blank">🗺️ Ver no Mapa</a>
+                        </div>
+                    `;
+                    
+                    allVisitsList.appendChild(visitCard);
+                });
+            } else {
+                allVisitsList.innerHTML = '<div class="no-visits">📅 Nenhuma visita agendada ainda.<br>Libere horários no calendário para que os membros possam agendar.</div>';
+            }
+        }
+
+        // Navegação de mês
+        function changeMonth(direction) {
+            currentMonth.setMonth(currentMonth.getMonth() + direction);
+            renderMemberCalendar();
+        }
+
+        function changePastorMonth(direction) {
+            pastorCurrentMonth.setMonth(pastorCurrentMonth.getMonth() + direction);
+            renderPastorCalendar();
+        }
+
+        // Utilitários
+        function debugStorage() {
+            console.log('=== 🔍 DEBUG STORAGE ===');
+            console.log('Horários:', availableSlots);
+            console.log('Visitas:', bookedVisits);
+            
+            const totalHorarios = Object.keys(availableSlots).length;
+            const totalVisitas = Object.keys(bookedVisits).length;
+            
+            alert(`🔍 DEBUG:\n\n📊 Dados:\n- ${totalHorarios} dias com horários\n- ${totalVisitas} dias com visitas\n\n💾 Armazenamento: localStorage`);
+        }
+
+        function clearAllData() {
+            if (confirm('Tem certeza que deseja limpar TODOS os dados? Esta ação não pode ser desfeita!')) {
+                localStorage.removeItem('visitasPastoraisCarlos');
+                sessionStorage.removeItem('visitasPastoraisCarlos_session');
+                
+                availableSlots = {};
+                bookedVisits = {};
+                
+                alert('🗑️ Todos os dados foram removidos!');
+                
+                renderMemberCalendar();
+                if (pastorLoggedIn) {
+                    renderPastorCalendar();
+                    renderAllVisits();
+                }
+            }
+        }
+
+        // Máscara de telefone
+        function setupPhoneMask() {
+            const phoneInput = document.getElementById('member-phone');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function() {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length <= 11) {
+                        value = value.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '$1 $2 $3-$4');
+                    }
+                    this.value = value;
+                });
+            }
+        }
+
+        // Fechar modais ao clicar fora
+        window.onclick = function(event) {
+            const memberModal = document.getElementById('member-modal');
+            const pastorModal = document.getElementById('pastor-modal');
+            
+            if (event.target === memberModal) {
+                closeMemberModal();
+            }
+            if (event.target === pastorModal) {
+                closePastorModal();
+            }
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            renderMemberCalendar();
+            setupPhoneMask();
+        });
     </script>
 </body>
 </html>
