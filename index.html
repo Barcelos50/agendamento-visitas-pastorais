@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de agendamento de visitas pastorais da Igreja Adventista do Sétimo Dia - Pr. Carlos Barcelos">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Visitas Pastorais">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23667eea'/%3E%3Ctext x='90' y='120' font-size='72' text-anchor='middle' fill='white'%3E✝️%3C/text%3E%3C/svg%3E">
+    
+    <!-- APIs Externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    
+    <title>Agendamento de Visitas Pastorais - Igreja Adventista do Sétimo Dia</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ Agendamento de Visitas Pastorais</h1>
+            <p>Igreja Adventista do Sétimo Dia</p>
+        </div>
+
+        <div class="panel-selector">
+            <button class="panel-btn active" onclick="showPanel('member')">👥 Painel dos Membros</button>
+            <button class="panel-btn" onclick="showPanel('pastor')">✝️ Pr. Carlos Barcelos</button>
+        </div>
+
+        <!-- Painel dos Membros -->
+        <div id="member-panel" class="panel active">
+            <h2>📅 Agendar Visita Pastoral</h2>
+            
+            <div class="month-nav">
+                <button onclick="changeMonth(-1)">‹ Mês Anterior</button>
+                <h3 id="current-month">Janeiro 2025</h3>
+                <button onclick="changeMonth(1)">Próximo Mês ›</button>
+            </div>
+
+            <div id="member-calendar" class="calendar"></div>
+        </div>
+
+        <!-- Painel do Pastor -->
+        <div id="pastor-panel" class="panel">
+            <!-- Tela de Login -->
+            <div id="pastor-login" class="pastor-login">
+                <h3>🔐 Acesso Restrito - Pr. Carlos Barcelos</h3>
+                <p>Digite a senha para acessar o painel pastoral:</p>
+                <input type="password" id="pastor-password" class="password-input" placeholder="Digite a senha..." onkeypress="checkEnter(event)">
+                <br>
+                <button class="login-btn" onclick="checkPassword()">Entrar</button>
+            </div>
+
+            <!-- Conteúdo do Pastor -->
+            <div id="pastor-content" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>✝️ Pr. Carlos Barcelos</h2>
+                    <button class="btn btn-secondary" onclick="logout()">Sair</button>
+                </div>
+
+                <!-- Lista de Todas as Visitas Agendadas -->
+                <div class="all-visits">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>📋 Todas as Visitas Agendadas</h3>
+                        <div>
+                            <button class="btn btn-secondary" onclick="debugStorage()" style="padding: 8px 15px; font-size: 0.9em; margin-right: 10px;">🔍 Debug</button>
+                            <button class="btn btn-secondary" onclick="clearAllData()" style="padding: 8px 15px; font-size: 0.9em;">🗑️ Limpar Dados</button>
+                        </div>
+                    </div>
+                    <div id="all-visits-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Membros - Agendamento -->
+        <div id="member-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Agendar Visita - <span id="member-selected-date"></span></h3>
+                    <button class="close" onclick="closeMemberModal()">&times;</button>
+                </div>
+                
+                <h4>Horários Disponíveis:</h4>
+                <div id="member-time-slots" class="time-slots"></div>
+
+                <div id="member-booking-form" style="display: none;">
+                    <h4>Dados para Agendamento</h4>
+                    <div class="form-group">
+                        <label for="member-name">Nome Completo:</label>
+                        <input type="text" id="member-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="member-phone">Telefone:</label>
+                        <input type="tel" id="member-phone" class="phone-mask" placeholder="55 0 0000-0000" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="member-address">Endereço Completo:</label>
+                        <textarea id="member-address" rows="3" required></textarea>
+                    </div>
+                    <button class="btn" onclick="confirmBooking()">Confirmar Agendamento</button>
+                    <button class="btn btn-secondary" onclick="cancelBooking()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Modulares -->
+    <script src="js/dateUtils.js"></script>
+    <script src="js/storageManager.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('SW registrado:', registration))
+                    .catch(error => console.log('Erro SW:', error));
+            });
+        }
+    </script>
+</body>
+</html>
