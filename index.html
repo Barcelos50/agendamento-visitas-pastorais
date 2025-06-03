@@ -1070,41 +1070,42 @@
                         const dadosNuvem = window.obterTodosAgendamentos();
                         
                         if (dadosNuvem) {
-    // Converter objeto para array se necessário
-    let agendamentos = Array.isArray(dadosNuvem) ? dadosNuvem : Object.values(dadosNuvem);
-    
-    if (agendamentos.length > 0) {
-        // Converter dados da nuvem para formato local
-        availableSlots = {};
-        bookedVisits = {};
-        
-        agendamentos.forEach(agendamento => {
-                                const data = agendamento.data;
-                                const horario = agendamento.horario;
-                                
-                                // Adicionar aos bookedVisits
-                                if (!bookedVisits[data]) {
-                                    bookedVisits[data] = {};
-                                }
-                                
-                                bookedVisits[data][horario] = {
-                                    name: agendamento.nome,
-                                    phone: agendamento.telefone,
-                                    address: agendamento.endereco,
-                                    dataAgendamento: agendamento.dataAgendamento || new Date().toLocaleString('pt-BR')
-                                };
-                                
-                                // Adicionar horário como disponível (já estava liberado)
-                                if (!availableSlots[data]) {
-                                    availableSlots[data] = [];
-                                }
-                                if (!availableSlots[data].includes(horario)) {
-                                    availableSlots[data].push(horario);
-                                }
-                            });
+                            // Converter objeto para array se necessário
+                            let agendamentos = Array.isArray(dadosNuvem) ? dadosNuvem : Object.values(dadosNuvem);
                             
-                            console.log('✅ Dados carregados da nuvem!');
-                            return;
+                            if (agendamentos.length > 0) {
+                                // Converter dados da nuvem para formato local
+                                availableSlots = {};
+                                bookedVisits = {};
+                                
+                                agendamentos.forEach(agendamento => {
+                                    const data = agendamento.data;
+                                    const horario = agendamento.horario;
+                                    
+                                    // Adicionar aos bookedVisits
+                                    if (!bookedVisits[data]) {
+                                        bookedVisits[data] = {};
+                                    }
+                                    
+                                    bookedVisits[data][horario] = {
+                                        name: agendamento.nome,
+                                        phone: agendamento.telefone,
+                                        address: agendamento.endereco,
+                                        dataAgendamento: agendamento.dataAgendamento || new Date().toLocaleString('pt-BR')
+                                    };
+                                    
+                                    // Adicionar horário como disponível (já estava liberado)
+                                    if (!availableSlots[data]) {
+                                        availableSlots[data] = [];
+                                    }
+                                    if (!availableSlots[data].includes(horario)) {
+                                        availableSlots[data].push(horario);
+                                    }
+                                });
+                                
+                                console.log('✅ Dados carregados da nuvem!');
+                                return;
+                            }
                         }
                     } catch (error) {
                         console.warn('⚠️ Erro ao carregar da nuvem, tentando local:', error);
