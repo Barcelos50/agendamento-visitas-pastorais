@@ -1069,12 +1069,16 @@
                         // Obter dados da nuvem via funções globais
                         const dadosNuvem = window.obterTodosAgendamentos();
                         
-                        if (dadosNuvem && dadosNuvem.length > 0) {
-                            // Converter dados da nuvem para formato local
-                            availableSlots = {};
-                            bookedVisits = {};
-                            
-                            dadosNuvem.forEach(agendamento => {
+                        if (dadosNuvem) {
+    // Converter objeto para array se necessário
+    let agendamentos = Array.isArray(dadosNuvem) ? dadosNuvem : Object.values(dadosNuvem);
+    
+    if (agendamentos.length > 0) {
+        // Converter dados da nuvem para formato local
+        availableSlots = {};
+        bookedVisits = {};
+        
+        agendamentos.forEach(agendamento => {
                                 const data = agendamento.data;
                                 const horario = agendamento.horario;
                                 
