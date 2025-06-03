@@ -1,6 +1,6 @@
 /**
  * Sistema de Armazenamento para Agendamento de Visitas Pastorais
- * Versão simplificada e funcional
+ * Versão corrigida e compatível com config.js atual
  */
 
 class PastoralStorage {
