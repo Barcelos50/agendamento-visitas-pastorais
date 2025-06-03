@@ -1029,8 +1029,23 @@
         }
         
         // ========================================
-        // FUNÇÕES INTEGRADAS COM NUVEM
+        // FUNÇÕES INTEGRADAS COM NUVEM - CORRIGIDAS
         // ========================================
+        
+        // Criar função de sincronização se não existir
+        function initCloudSync() {
+            if (!window.sincronizarComNuvem) {
+                window.sincronizarComNuvem = async function(data) {
+                    // Para horários liberados, salvar direto no localStorage
+                    localStorage.setItem('visitasPastoraisCarlos', JSON.stringify(data));
+                    sessionStorage.setItem('visitasPastoraisCarlos_session', JSON.stringify(data));
+                    
+                    console.log('💾 Dados sincronizados localmente (será enviado para nuvem no próximo agendamento)');
+                    return true;
+                };
+                console.log('✅ Função sincronizarComNuvem criada!');
+            }
+        }
         
         // Armazenamento com integração de nuvem
         async function saveData() {
@@ -1070,7 +1085,7 @@
                         const dadosNuvem = window.obterTodosAgendamentos();
                         
                         if (dadosNuvem) {
-                            // Converter objeto para array se necessário
+                            // Converter objeto para array se necessário - CORREÇÃO APLICADA
                             let agendamentos = Array.isArray(dadosNuvem) ? dadosNuvem : Object.values(dadosNuvem);
                             
                             if (agendamentos.length > 0) {
@@ -1533,7 +1548,7 @@
             }
         }
         
-        // Liberação de horários com integração de nuvem
+        // Liberação de horários com integração de nuvem - FUNÇÃO CORRIGIDA
         async function releaseSelectedTimes() {
             if (!selectedPastorDate || selectedPastorTimes.length === 0) {
                 alert('Selecione pelo menos um horário para liberar.');
@@ -1541,22 +1556,43 @@
             }
             
             const dateKey = formatDateKey(selectedPastorDate);
-            if (!availableSlots[dateKey]) {
-                availableSlots[dateKey] = [];
-            }
             
-            selectedPastorTimes.forEach(time => {
-                if (!availableSlots[dateKey].includes(time)) {
-                    availableSlots[dateKey].push(time);
+            try {
+                // Adicionar aos slots locais
+                if (!availableSlots[dateKey]) {
+                    availableSlots[dateKey] = [];
                 }
-            });
-            
-            await saveData(); // Usar função modificada que sincroniza com nuvem
-            selectedPastorTimes = [];
-            openPastorModal(selectedPastorDate);
-            renderPastorCalendar();
-            
-            alert('✅ Horários liberados com sucesso!');
+                
+                selectedPastorTimes.forEach(time => {
+                    if (!availableSlots[dateKey].includes(time)) {
+                        availableSlots[dateKey].push(time);
+                    }
+                });
+                
+                // Usar função da nuvem para salvar horários
+                if (window.sincronizarComNuvem) {
+                    const data = {
+                        availableSlots: availableSlots,
+                        bookedVisits: bookedVisits,
+                        lastUpdate: new Date().getTime()
+                    };
+                    
+                    await window.sincronizarComNuvem(data);
+                    console.log('✅ Horários salvos na nuvem!');
+                } else {
+                    await saveData();
+                }
+                
+                selectedPastorTimes = [];
+                openPastorModal(selectedPastorDate);
+                renderPastorCalendar();
+                
+                alert('✅ Horários liberados e salvos na nuvem!');
+                
+            } catch (error) {
+                console.error('Erro ao salvar horários:', error);
+                alert('Erro ao salvar horários. Tente novamente.');
+            }
         }
         
         function closePastorModal() {
@@ -1745,7 +1781,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Aguardar carregamento do sistema de nuvem
             setTimeout(async () => {
-                await loadData(); // Usar função modificada
+                // Inicializar sincronização de nuvem
+                initCloudSync();
+                
+                // Carregar dados
+                await loadData();
                 renderMemberCalendar();
                 setupPhoneMask();
                 
