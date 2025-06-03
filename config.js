@@ -3,7 +3,7 @@ const PASTORAL_CONFIG = {
     // Suas informações do GitHub
     GITHUB_USERNAME: 'Barcelos50',
     GITHUB_REPO: 'agendamento-visitas-pastorais',
-    GITHUB_TOKEN: 'ghp_RYKVvZZqXpxuEfD4NKVIMdLCjkUFqV6x3qan', // Seu token atual
+    GITHUB_TOKEN: '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', // Seu token atual
     DADOS_ARQUIVO: 'dados-pastorais.json',
     
     // Configurações da igreja
