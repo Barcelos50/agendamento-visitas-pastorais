@@ -6,11 +6,7 @@
     <title>Agendamento de Visitas - Igreja Adventista</title>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,7 +16,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -41,71 +37,56 @@
             font-weight: 300;
         }
         
-        .cloud-badge {
-            background: rgba(23, 162, 184, 0.2);
-            color: #17a2b8;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            display: inline-block;
-            margin-top: 10px;
-            border: 1px solid rgba(23, 162, 184, 0.3);
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 1000;
         }
         
-        .panel-selector {
+        .status.online { background: #28a745; color: white; }
+        .status.offline { background: #dc3545; color: white; }
+        .status.loading { background: #ffc107; color: #000; }
+        
+        .tabs {
             display: flex;
             background: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
         }
         
-        .panel-btn {
+        .tab {
             flex: 1;
             padding: 20px;
             background: none;
             border: none;
-            font-size: 1.1em;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: all 0.3s;
         }
         
-        .panel-btn.active {
+        .tab.active {
             background: white;
             color: #667eea;
             font-weight: 600;
+            border-bottom: 3px solid #667eea;
         }
         
-        .panel-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #667eea;
-        }
-        
-        .panel {
+        .content {
             display: none;
             padding: 30px;
         }
         
-        .panel.active {
-            display: block;
-        }
+        .content.active { display: block; }
         
-        .cloud-info {
+        .info-box {
             background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
-            border: 2px solid #17a2b8;
+            border: 2px solid #2196f3;
             border-radius: 15px;
-            padding: 25px;
-            margin: 25px 0;
-        }
-        
-        .cloud-info h3 {
-            color: #17a2b8;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            padding: 20px;
+            margin: 20px 0;
         }
         
         .calendar {
@@ -121,10 +102,11 @@
         .calendar-header {
             background: #667eea;
             color: white;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             font-weight: 600;
             border-radius: 8px;
+            font-size: 14px;
         }
         
         .calendar-day {
@@ -136,7 +118,7 @@
             border: 2px solid #e9ecef;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             font-weight: 500;
         }
         
@@ -144,43 +126,114 @@
             background: #667eea;
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
-        .calendar-day.has-slots {
+        .calendar-day.available {
             background: #28a745;
             color: white;
             border-color: #28a745;
         }
         
-        .pastor-login {
-            text-align: center;
-            padding: 50px;
-            background: #f8f9fa;
-            border-radius: 15px;
+        .calendar-day.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            float: right;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .horarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
             margin: 20px 0;
         }
         
-        .password-input {
-            padding: 15px;
+        .horario {
+            padding: 12px;
+            background: #f8f9fa;
             border: 2px solid #e9ecef;
-            border-radius: 10px;
-            font-size: 1.1em;
-            margin: 10px;
-            width: 300px;
-            max-width: 100%;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .horario:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .horario.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .form-group {
+            margin: 15px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
         }
         
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px 25px;
             border-radius: 10px;
-            font-size: 1.1em;
+            font-size: 16px;
             cursor: pointer;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
+            width: 100%;
+            margin: 10px 0;
         }
         
         .btn:hover {
@@ -194,75 +247,29 @@
             transform: none;
         }
         
-        .form-group {
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .login-area {
+            text-align: center;
+            padding: 50px 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
             margin: 20px 0;
         }
         
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group input, .form-group textarea {
-            width: 100%;
+        .password-input {
             padding: 15px;
             border: 2px solid #e9ecef;
             border-radius: 10px;
-            font-size: 1em;
+            font-size: 16px;
+            width: 280px;
+            max-width: 100%;
+            margin: 15px 0;
         }
         
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .time-slot {
-            padding: 12px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .time-slot:hover {
-            background: #667eea;
-            color: white;
-        }
-        
-        .time-slot.selected {
-            background: #667eea;
-            color: white;
-        }
-        
-        .visit-card {
+        .visita-card {
             background: white;
             border: 1px solid #e9ecef;
             border-radius: 15px;
@@ -271,18 +278,18 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        .visit-date {
+        .visita-data {
             background: #667eea;
             color: white;
             padding: 8px 15px;
             border-radius: 20px;
-            font-size: 0.9em;
+            font-size: 14px;
             font-weight: 600;
             display: inline-block;
             margin-bottom: 10px;
         }
         
-        .contact-btn {
+        .contato-btn {
             padding: 8px 15px;
             margin: 5px;
             border: none;
@@ -290,906 +297,688 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            font-size: 0.9em;
+            font-size: 14px;
             color: white;
+            font-weight: 500;
         }
         
-        .whatsapp-btn { background: #25D366; }
-        .phone-btn { background: #007bff; }
-        .maps-btn { background: #EA4335; }
-        
-        .close {
-            background: #dc3545;
-            color: white;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            float: right;
-        }
+        .whatsapp { background: #25D366; }
+        .telefone { background: #007bff; }
+        .mapa { background: #EA4335; }
         
         .loading {
-            display: none;
             text-align: center;
             padding: 20px;
             color: #667eea;
+            font-weight: 600;
         }
         
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e9ecef;
         }
         
-        .status-indicator {
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .notification {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             right: 20px;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
+            padding: 15px 25px;
+            border-radius: 10px;
             font-weight: 600;
             z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         
-        .status-online {
-            background: #28a745;
-            color: white;
-        }
+        .notification.success { background: #28a745; color: white; }
+        .notification.error { background: #dc3545; color: white; }
+        .notification.warning { background: #ffc107; color: #000; }
         
-        .status-offline {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .sync-info {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            color: #856404;
-            font-size: 0.9em;
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .header h1 { font-size: 2em; }
+            .calendar { padding: 15px; gap: 5px; }
+            .calendar-header { padding: 8px; font-size: 12px; }
+            .calendar-day { font-size: 14px; }
+            .modal-content { margin: 10% auto; padding: 20px; }
         }
     </style>
 </head>
+
 <body>
-    <div class="status-indicator" id="status-indicator">🔄 Conectando...</div>
+    <div class="status" id="status">🔄 Carregando...</div>
     
     <div class="container">
         <div class="header">
             <h1>🏛️ Agendamento de Visitas Pastorais</h1>
-            <p>Igreja Adventista do Sétimo Dia</p>
-            <div class="cloud-badge">☁️ Sistema em Tempo Real</div>
+            <p>Igreja Adventista do Sétimo Dia - Passo Fundo/RS</p>
         </div>
         
-        <div class="panel-selector">
-            <button class="panel-btn active" onclick="showPanel('member')">👥 Agendar Visita</button>
-            <button class="panel-btn" onclick="showPanel('pastor')">🏛️ Painel Pastor</button>
+        <div class="tabs">
+            <button class="tab active" onclick="mostrarAba('membro')">👥 Agendar Visita</button>
+            <button class="tab" onclick="mostrarAba('pastor')">🏛️ Painel Pastor</button>
         </div>
         
-        <!-- Painel dos Membros -->
-        <div id="member-panel" class="panel active">
-            <div class="cloud-info">
-                <h3>☁️ Sistema em Tempo Real</h3>
-                <ul style="margin-left: 20px; line-height: 1.6;">
-                    <li>✅ <strong>Horários sempre atualizados</strong> - vê disponibilidade real</li>
-                    <li>✅ <strong>Sem agendamentos duplicados</strong> - sistema bloqueia automaticamente</li>
-                    <li>✅ <strong>Funciona em qualquer dispositivo</strong> - sem precisar de espaço no celular</li>
-                    <li>✅ <strong>Dados seguros na nuvem</strong> - criptografados e protegidos</li>
-                    <li>✅ <strong>Pastor recebe instantaneamente</strong> - notificação em tempo real</li>
+        <!-- ABA DOS MEMBROS -->
+        <div id="aba-membro" class="content active">
+            <div class="info-box">
+                <h3>⚡ Sistema em Tempo Real</h3>
+                <ul style="margin: 10px 0 0 20px;">
+                    <li>✅ Horários sempre atualizados</li>
+                    <li>✅ Sem agendamentos duplicados</li>
+                    <li>✅ Funciona em qualquer dispositivo</li>
+                    <li>✅ Pastor recebe instantaneamente</li>
                 </ul>
             </div>
             
-            <div class="sync-info" id="sync-info" style="display: none;">
-                ⚠️ <strong>Conectando com servidor...</strong> Aguarde para ver horários atualizados.
-            </div>
-            
-            <h2>📅 Selecione uma Data</h2>
-            <div id="member-calendar" class="calendar">
-                <div class="loading" style="display: block; grid-column: 1 / -1;">
-                    Carregando horários disponíveis...
-                </div>
+            <h2>📅 Escolha uma Data</h2>
+            <div id="calendario" class="calendar">
+                <div class="loading">Carregando horários disponíveis...</div>
             </div>
         </div>
         
-        <!-- Painel do Pastor -->
-        <div id="pastor-panel" class="panel">
-            <!-- Login Seguro -->
-            <div id="pastor-login" class="pastor-login">
-                <h3>🔐 Acesso Restrito - Pr. Carlos Barcelos</h3>
-                <p>Digite a senha para acessar o painel pastoral:</p>
-                <input type="password" id="pastor-password" class="password-input" placeholder="Senha do pastor" onkeypress="checkEnter(event)">
+        <!-- ABA DO PASTOR -->
+        <div id="aba-pastor" class="content">
+            <!-- Login -->
+            <div id="login" class="login-area">
+                <h3>🔐 Acesso Restrito</h3>
+                <p>Pr. Carlos Barcelos</p>
+                <input type="password" id="senha" class="password-input" placeholder="Digite a senha">
                 <br>
-                <button class="btn" onclick="checkPassword()">Entrar</button>
+                <button class="btn" onclick="fazerLogin()">Entrar</button>
             </div>
             
-            <!-- Conteúdo do Pastor -->
-            <div id="pastor-content" style="display: none;">
+            <!-- Painel do Pastor -->
+            <div id="painel" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>🏛️ Painel Pastoral</h2>
-                    <div>
-                        <button class="btn" onclick="liberarHorarios()" style="margin-right: 10px;">📅 Liberar Horários</button>
-                        <button class="btn" style="background: #6c757d;" onclick="logout()">Sair</button>
+                    <h2>📊 Painel Pastoral</h2>
+                    <button class="btn btn-secondary" onclick="sair()" style="width: auto;">Sair</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-agendamentos">0</div>
+                        <div>Agendamentos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="horarios-livres">0</div>
+                        <div>Horários Livres</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="ultima-atualizacao">--:--</div>
+                        <div>Última Atualização</div>
                     </div>
                 </div>
                 
-                <!-- Estatísticas -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
-                        <div style="font-size: 2em; color: #667eea; font-weight: bold;" id="total-visits">0</div>
-                        <div>Visitas Agendadas</div>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
-                        <div style="font-size: 2em; color: #28a745; font-weight: bold;" id="available-slots">0</div>
-                        <div>Horários Disponíveis</div>
-                    </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; text-align: center;">
-                        <div style="font-size: 2em; color: #17a2b8; font-weight: bold;" id="last-sync">--</div>
-                        <div>Última Sincronização</div>
-                    </div>
-                </div>
-                
-                <!-- Lista de Visitas -->
-                <div style="background: #f8f9fa; border-radius: 15px; padding: 25px; margin: 20px 0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>📋 Visitas Agendadas</h3>
-                        <button class="btn" onclick="refreshData()" style="background: #17a2b8;">🔄 Atualizar</button>
-                    </div>
-                    <div id="all-visits-list">
-                        <div class="loading" style="display: block;">
-                            Carregando agendamentos...
-                        </div>
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <h3>📋 Agendamentos</h3>
+                    <button class="btn" onclick="atualizarDados()" style="background: #17a2b8; margin-bottom: 15px;">🔄 Atualizar</button>
+                    <div id="lista-agendamentos">
+                        <div class="loading">Carregando agendamentos...</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Modal para Agendamento -->
-    <div id="member-modal" class="modal">
+    <!-- MODAL DE AGENDAMENTO -->
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <button class="close" onclick="closeMemberModal()">&times;</button>
-            <h3>Agendar Visita - <span id="member-selected-date"></span></h3>
+            <button class="close" onclick="fecharModal()">&times;</button>
+            <h3>Agendar Visita - <span id="data-selecionada"></span></h3>
             
             <h4>Horários Disponíveis:</h4>
-            <div id="member-time-slots" class="time-slots">
-                <div class="loading" style="display: block; grid-column: 1 / -1;">
-                    Carregando horários...
-                </div>
-            </div>
+            <div id="horarios-disponiveis" class="horarios"></div>
             
-            <div id="member-booking-form" style="display: none;">
-                <h4>Dados para Agendamento</h4>
+            <div id="formulario" style="display: none;">
+                <h4>Seus Dados</h4>
                 <div class="form-group">
-                    <label for="member-name">Nome Completo:</label>
-                    <input type="text" id="member-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="member-phone">Telefone:</label>
-                    <input type="tel" id="member-phone" placeholder="(00) 00000-0000" required>
+                    <label>Nome Completo:</label>
+                    <input type="text" id="nome" required>
                 </div>
                 <div class="form-group">
-                    <label for="member-address">Endereço Completo:</label>
-                    <textarea id="member-address" rows="3" required></textarea>
+                    <label>Telefone/WhatsApp:</label>
+                    <input type="tel" id="telefone" placeholder="(00) 00000-0000" required>
                 </div>
-                <div class="loading" id="booking-loading">
-                    Salvando agendamento...
+                <div class="form-group">
+                    <label>Endereço:</label>
+                    <textarea id="endereco" rows="3" required></textarea>
                 </div>
-                <button class="btn" id="confirm-btn" onclick="confirmBooking()">Confirmar Agendamento</button>
-                <button class="btn" style="background: #6c757d;" onclick="cancelBooking()">Cancelar</button>
+                
+                <button class="btn" id="btn-confirmar" onclick="confirmarAgendamento()">
+                    Confirmar Agendamento
+                </button>
+                <button class="btn btn-secondary" onclick="cancelarAgendamento()">
+                    Cancelar
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // SISTEMA DE NUVEM EM TEMPO REAL
-        // ============================================
+        // ==========================================
+        // CONFIGURAÇÕES
+        // ==========================================
         
-        class CloudPastoralSystem {
-            constructor() {
-                this.repoOwner = 'Barcelos50'; // ✅ SEU USUÁRIO
-this.repoName = 'agendamento-visitas-pastorais'; // ✅ SEU REPOSITÓRIO
-                this.dataFile = 'dados-agendamentos.json';
-                this.isOnline = false;
-                this.lastSync = null;
-                this.cache = {
-                    availableSlots: {},
-                    bookedVisits: {}
-                };
-                this.init();
-            }
-            
-            async init() {
-                this.updateStatus('🔄 Conectando...');
-                await this.loadFromCloud();
-                this.startAutoSync();
-                console.log('✅ Sistema de nuvem inicializado');
-            }
-            
-            // Carregar dados da nuvem
-            async loadFromCloud() {
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/${this.dataFile}`, {
-                        headers: {
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
+        const CONFIG = {
+            usuario: 'Barcelos50',
+            repositorio: 'agendamento-visitas-pastorais',
+            arquivo: 'dados.json',
+            senha: 'Pastor@1844'
+        };
+        
+        // ==========================================
+        // VARIÁVEIS GLOBAIS
+        // ==========================================
+        
+        let dados = { horarios: {}, agendamentos: {} };
+        let dataSelecionada = null;
+        let horarioSelecionado = null;
+        let pastorLogado = false;
+        
+        // ==========================================
+        // SISTEMA DE DADOS
+        // ==========================================
+        
+        async function carregarDados() {
+            try {
+                atualizarStatus('🔄 Carregando...', 'loading');
+                
+                const url = `https://api.github.com/repos/${CONFIG.usuario}/${CONFIG.repositorio}/contents/${CONFIG.arquivo}`;
+                const response = await fetch(url);
+                
+                if (response.ok) {
+                    const arquivo = await response.json();
+                    const conteudo = atob(arquivo.content);
+                    dados = JSON.parse(conteudo);
                     
-                    if (response.ok) {
-                        const fileData = await response.json();
-                        const content = atob(fileData.content);
-                        const data = JSON.parse(content);
-                        
-                        this.cache = data;
-                        this.lastSync = new Date();
-                        this.isOnline = true;
-                        this.updateStatus('🟢 Online');
-                        
-                        console.log('✅ Dados carregados da nuvem:', data);
-                        return data;
-                    } else if (response.status === 404) {
-                        // Arquivo não existe, criar estrutura inicial
-                        await this.createInitialData();
-                        return this.cache;
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
+                    atualizarStatus('🟢 Online', 'online');
+                    console.log('✅ Dados carregados:', dados);
+                    
+                    renderizarCalendario();
+                    if (pastorLogado) {
+                        atualizarPainel();
                     }
-                } catch (error) {
-                    console.error('❌ Erro ao carregar da nuvem:', error);
-                    this.isOnline = false;
-                    this.updateStatus('🔴 Offline');
-                    this.loadFromCache();
-                    return this.cache;
-                }
-            }
-            
-            // Criar dados iniciais
-            async createInitialData() {
-                const initialData = {
-                    availableSlots: this.generateInitialSlots(),
-                    bookedVisits: {},
-                    lastUpdate: new Date().toISOString(),
-                    version: '1.0'
-                };
-                
-                this.cache = initialData;
-                await this.saveToCloud(initialData);
-                return initialData;
-            }
-            
-            // Gerar horários iniciais
-            generateInitialSlots() {
-                const slots = {};
-                const today = new Date();
-                const timeSlots = ['14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
-                
-                for (let i = 1; i <= 30; i++) {
-                    const date = new Date(today);
-                    date.setDate(today.getDate() + i);
-                    
-                    // Pula sábados
-                    if (date.getDay() === 6) continue;
-                    
-                    const dateKey = this.formatDateKey(date);
-                    slots[dateKey] = [...timeSlots];
-                }
-                
-                return slots;
-            }
-            
-            // Salvar na nuvem (simulado - em produção usar GitHub API com token)
-            async saveToCloud(data) {
-                try {
-                    // SIMULAÇÃO: Em produção real, você precisaria de um backend
-                    // Por enquanto, vamos simular salvamento bem-sucedido
-                    
-                    console.log('💾 Salvando na nuvem (simulado):', data);
-                    
-                    // Simular delay de rede
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    this.cache = data;
-                    this.lastSync = new Date();
-                    this.updateLastSync();
                     
                     return true;
-                } catch (error) {
-                    console.error('❌ Erro ao salvar na nuvem:', error);
-                    return false;
+                } else {
+                    throw new Error('Arquivo não encontrado');
                 }
-            }
-            
-            // Fazer agendamento
-            async makeBooking(date, time, memberData) {
-                try {
-                    this.showLoading(true);
-                    
-                    // Verificar se horário ainda está disponível
-                    if (!this.cache.availableSlots[date] || !this.cache.availableSlots[date].includes(time)) {
-                        throw new Error('Horário não disponível');
-                    }
-                    
-                    // Verificar se não está já ocupado
-                    if (this.cache.bookedVisits[date] && this.cache.bookedVisits[date][time]) {
-                        throw new Error('Horário já foi agendado por outra pessoa');
-                    }
-                    
-                    // Remover horário dos disponíveis
-                    this.cache.availableSlots[date] = this.cache.availableSlots[date].filter(t => t !== time);
-                    
-                    // Adicionar agendamento
-                    if (!this.cache.bookedVisits[date]) {
-                        this.cache.bookedVisits[date] = {};
-                    }
-                    
-                    this.cache.bookedVisits[date][time] = {
-                        name: memberData.name,
-                        phone: memberData.phone,
-                        address: memberData.address,
-                        dataAgendamento: new Date().toISOString(),
-                        status: 'agendado'
-                    };
-                    
-                    this.cache.lastUpdate = new Date().toISOString();
-                    
-                    // Salvar na nuvem
-                    const saved = await this.saveToCloud(this.cache);
-                    
-                    if (saved) {
-                        this.showNotification('✅ Agendamento realizado com sucesso!');
-                        return true;
-                    } else {
-                        throw new Error('Erro ao salvar agendamento');
-                    }
-                    
-                } catch (error) {
-                    console.error('❌ Erro no agendamento:', error);
-                    this.showNotification('❌ ' + error.message);
-                    return false;
-                } finally {
-                    this.showLoading(false);
-                }
-            }
-            
-            // Liberar horários (pastor)
-            async releaseTimeSlots(date, times) {
-                try {
-                    if (!this.cache.availableSlots[date]) {
-                        this.cache.availableSlots[date] = [];
-                    }
-                    
-                    times.forEach(time => {
-                        if (!this.cache.availableSlots[date].includes(time)) {
-                            this.cache.availableSlots[date].push(time);
-                        }
-                    });
-                    
-                    this.cache.lastUpdate = new Date().toISOString();
-                    
-                    const saved = await this.saveToCloud(this.cache);
-                    if (saved) {
-                        this.showNotification('✅ Horários liberados com sucesso!');
-                        this.refreshInterface();
-                        return true;
-                    }
-                    
-                    return false;
-                } catch (error) {
-                    console.error('❌ Erro ao liberar horários:', error);
-                    return false;
-                }
-            }
-            
-            // Utilitários
-            formatDateKey(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-            
-            formatDateDisplay(date) {
-                return date.toLocaleDateString('pt-BR', {
-                    weekday: 'long',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                });
-            }
-            
-            // Interface
-            updateStatus(status) {
-                const indicator = document.getElementById('status-indicator');
-                if (indicator) {
-                    indicator.textContent = status;
-                    indicator.className = 'status-indicator ' + 
-                        (status.includes('Online') ? 'status-online' : 'status-offline');
-                }
-            }
-            
-            updateLastSync() {
-                const element = document.getElementById('last-sync');
-                if (element && this.lastSync) {
-                    element.textContent = this.lastSync.toLocaleTimeString('pt-BR');
-                }
-            }
-            
-            showNotification(message) {
-                const notification = document.createElement('div');
-                notification.style.cssText = `
-                    position: fixed; bottom: 20px; right: 20px; 
-                    background: ${message.includes('✅') ? '#28a745' : '#dc3545'};
-                    color: white; padding: 15px 25px; border-radius: 10px; 
-                    z-index: 10000; font-weight: 600; max-width: 300px;
-                    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-                `;
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 5000);
-            }
-            
-            showLoading(show) {
-                const loading = document.getElementById('booking-loading');
-                if (loading) {
-                    loading.style.display = show ? 'block' : 'none';
-                }
-                
-                const btn = document.getElementById('confirm-btn');
-                if (btn) {
-                    btn.disabled = show;
-                    btn.textContent = show ? 'Salvando...' : 'Confirmar Agendamento';
-                }
-            }
-            
-            loadFromCache() {
-                // Fallback para dados em cache local
-                const cached = localStorage.getItem('pastoral_cache');
-                if (cached) {
-                    this.cache = JSON.parse(cached);
-                }
-            }
-            
-            startAutoSync() {
-                // Sincronizar a cada 30 segundos
-                setInterval(async () => {
-                    await this.loadFromCloud();
-                    this.refreshInterface();
-                }, 30000);
-            }
-            
-            refreshInterface() {
-                // Atualizar calendários e listas
-                renderMemberCalendar();
-                if (window.pastorLoggedIn) {
-                    renderAllVisits();
-                    updatePastorStats();
-                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                atualizarStatus('🔴 Offline', 'offline');
+                mostrarNotificacao('⚠️ Erro de conexão. Tente novamente.', 'warning');
+                return false;
             }
         }
         
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
+        async function salvarDados() {
+            try {
+                // SIMULAÇÃO: Em produção real precisaria de token GitHub
+                console.log('💾 Salvando dados (simulado):', dados);
+                
+                // Simular delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Salvar no localStorage como backup
+                localStorage.setItem('backup_igreja', JSON.stringify(dados));
+                
+                mostrarNotificacao('✅ Agendamento salvo!', 'success');
+                
+                // Recarregar dados para todos verem a atualização
+                setTimeout(carregarDados, 2000);
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Erro ao salvar:', error);
+                mostrarNotificacao('❌ Erro ao salvar. Tente novamente.', 'error');
+                return false;
+            }
+        }
         
-        const cloudSystem = new CloudPastoralSystem();
-        const PASTOR_PASSWORD = 'Pastor@1844Adventista';
-        let currentMonth = new Date();
-        let selectedDate = null;
-        let selectedTime = null;
-        let pastorLoggedIn = false;
+        // ==========================================
+        // INTERFACE - GERAL
+        // ==========================================
         
-        const months = [
-            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ];
-        const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-        
-        // ============================================
-        // FUNÇÕES DA INTERFACE
-        // ============================================
-        
-        function showPanel(panel) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.panel-btn').forEach(b => b.classList.remove('active'));
+        function mostrarAba(aba) {
+            // Atualizar botões
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
             
-            document.getElementById(panel + '-panel').classList.add('active');
+            // Mostrar aba selecionada
             event.target.classList.add('active');
+            document.getElementById(`aba-${aba}`).classList.add('active');
             
-            if (panel === 'member') {
-                renderMemberCalendar();
-            } else if (pastorLoggedIn) {
-                renderAllVisits();
-                updatePastorStats();
+            if (aba === 'membro') {
+                renderizarCalendario();
+            } else if (aba === 'pastor' && pastorLogado) {
+                atualizarPainel();
             }
         }
         
-        function renderMemberCalendar() {
-            const calendar = document.getElementById('member-calendar');
-            calendar.innerHTML = '';
+        function atualizarStatus(texto, tipo) {
+            const status = document.getElementById('status');
+            status.textContent = texto;
+            status.className = `status ${tipo}`;
+        }
+        
+        function mostrarNotificacao(mensagem, tipo) {
+            const notif = document.createElement('div');
+            notif.className = `notification ${tipo}`;
+            notif.textContent = mensagem;
+            document.body.appendChild(notif);
             
-            // Headers dos dias da semana
-            weekDays.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-header';
-                dayHeader.textContent = day;
-                calendar.appendChild(dayHeader);
+            setTimeout(() => {
+                if (document.body.contains(notif)) {
+                    document.body.removeChild(notif);
+                }
+            }, 5000);
+        }
+        
+        // ==========================================
+        // INTERFACE - CALENDÁRIO
+        // ==========================================
+        
+        function renderizarCalendario() {
+            const calendario = document.getElementById('calendario');
+            calendario.innerHTML = '';
+            
+            // Cabeçalho dos dias
+            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            diasSemana.forEach(dia => {
+                const elemento = document.createElement('div');
+                elemento.className = 'calendar-header';
+                elemento.textContent = dia;
+                calendario.appendChild(elemento);
             });
             
-            // Dias do mês
-            const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-            const startDate = new Date(firstDay);
-            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            // Dias do mês atual
+            const hoje = new Date();
+            const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const inicio = new Date(primeiroDia);
+            inicio.setDate(inicio.getDate() - primeiroDia.getDay());
             
             for (let i = 0; i < 42; i++) {
-                const cellDate = new Date(startDate);
-                cellDate.setDate(startDate.getDate() + i);
+                const data = new Date(inicio);
+                data.setDate(inicio.getDate() + i);
                 
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                dayElement.textContent = cellDate.getDate();
+                const elemento = document.createElement('div');
+                elemento.className = 'calendar-day';
+                elemento.textContent = data.getDate();
                 
-                const dateKey = cloudSystem.formatDateKey(cellDate);
-                const today = new Date();
+                const chaveData = formatarData(data);
+                const horarios = dados.horarios[chaveData] || [];
                 
-                if (cellDate.getMonth() !== currentMonth.getMonth()) {
-                    dayElement.style.opacity = '0.3';
-                    dayElement.style.cursor = 'default';
-                } else if (cellDate < today) {
-                    dayElement.style.opacity = '0.3';
-                    dayElement.style.cursor = 'default';
+                if (data.getMonth() !== hoje.getMonth()) {
+                    elemento.classList.add('disabled');
+                } else if (data < hoje) {
+                    elemento.classList.add('disabled');
+                } else if (horarios.length > 0) {
+                    elemento.classList.add('available');
+                    elemento.onclick = () => abrirModal(data);
                 } else {
-                    // Verificar se tem horários disponíveis
-                    const slots = cloudSystem.cache.availableSlots[dateKey];
-                    if (slots && slots.length > 0) {
-                        dayElement.classList.add('has-slots');
-                        dayElement.onclick = () => openMemberModal(cellDate);
-                    }
+                    elemento.classList.add('disabled');
                 }
                 
-                calendar.appendChild(dayElement);
+                calendario.appendChild(elemento);
             }
         }
         
-        function openMemberModal(date) {
-            selectedDate = date;
-            const dateKey = cloudSystem.formatDateKey(selectedDate);
+        // ==========================================
+        // MODAL DE AGENDAMENTO
+        // ==========================================
+        
+        function abrirModal(data) {
+            dataSelecionada = data;
+            const chaveData = formatarData(data);
             
-            document.getElementById('member-modal').style.display = 'block';
-            document.getElementById('member-selected-date').textContent = cloudSystem.formatDateDisplay(selectedDate);
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('data-selecionada').textContent = 
+                data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
             
-            const timeSlotsContainer = document.getElementById('member-time-slots');
-            timeSlotsContainer.innerHTML = '';
+            // Mostrar horários disponíveis
+            const container = document.getElementById('horarios-disponiveis');
+            container.innerHTML = '';
             
-            const slots = cloudSystem.cache.availableSlots[dateKey];
-            if (slots && slots.length > 0) {
-                slots.forEach(time => {
-                    const timeElement = document.createElement('div');
-                    timeElement.className = 'time-slot';
-                    timeElement.textContent = time;
-                    timeElement.onclick = () => selectMemberTime(time);
-                    timeSlotsContainer.appendChild(timeElement);
-                });
-            } else {
-                timeSlotsContainer.innerHTML = '<div style="text-align: center; color: #666; grid-column: 1 / -1; padding: 20px;">Nenhum horário disponível neste dia.</div>';
+            const horarios = dados.horarios[chaveData] || [];
+            const agendamentos = dados.agendamentos[chaveData] || {};
+            
+            horarios.forEach(horario => {
+                if (!agendamentos[horario]) {
+                    const elemento = document.createElement('div');
+                    elemento.className = 'horario';
+                    elemento.textContent = horario;
+                    elemento.onclick = () => selecionarHorario(horario);
+                    container.appendChild(elemento);
+                }
+            });
+            
+            if (container.children.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px; color: #666;">Nenhum horário disponível</p>';
             }
         }
         
-        function selectMemberTime(time) {
-            selectedTime = time;
-            document.querySelectorAll('#member-time-slots .time-slot').forEach(t => t.classList.remove('selected'));
+        function selecionarHorario(horario) {
+            horarioSelecionado = horario;
+            
+            // Atualizar visual
+            document.querySelectorAll('.horario').forEach(h => h.classList.remove('selected'));
             event.target.classList.add('selected');
-            document.getElementById('member-booking-form').style.display = 'block';
+            
+            // Mostrar formulário
+            document.getElementById('formulario').style.display = 'block';
         }
         
-        async function confirmBooking() {
-            const name = document.getElementById('member-name').value.trim();
-            const phone = document.getElementById('member-phone').value.trim();
-            const address = document.getElementById('member-address').value.trim();
+        function fecharModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('formulario').style.display = 'none';
+            limparFormulario();
+        }
+        
+        function cancelarAgendamento() {
+            fecharModal();
+        }
+        
+        // ==========================================
+        // AGENDAMENTO
+        // ==========================================
+        
+        async function confirmarAgendamento() {
+            const nome = document.getElementById('nome').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const endereco = document.getElementById('endereco').value.trim();
             
-            if (!name || !phone || !address) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
+            if (!nome || !telefone || !endereco || !horarioSelecionado) {
+                mostrarNotificacao('❌ Preencha todos os campos', 'error');
                 return;
             }
             
-            if (!selectedDate || !selectedTime) {
-                alert('Por favor, selecione data e horário.');
-                return;
+            // Desabilitar botão
+            const btn = document.getElementById('btn-confirmar');
+            btn.disabled = true;
+            btn.textContent = '⏳ Salvando...';
+            
+            try {
+                const chaveData = formatarData(dataSelecionada);
+                
+                // Verificar se horário ainda está disponível
+                const agendamentos = dados.agendamentos[chaveData] || {};
+                if (agendamentos[horarioSelecionado]) {
+                    throw new Error('Horário já foi agendado por outra pessoa');
+                }
+                
+                // Criar agendamento
+                if (!dados.agendamentos[chaveData]) {
+                    dados.agendamentos[chaveData] = {};
+                }
+                
+                dados.agendamentos[chaveData][horarioSelecionado] = {
+                    nome: nome,
+                    telefone: telefone,
+                    endereco: endereco,
+                    dataAgendamento: new Date().toISOString()
+                };
+                
+                // Remover horário dos disponíveis
+                if (dados.horarios[chaveData]) {
+                    dados.horarios[chaveData] = dados.horarios[chaveData].filter(h => h !== horarioSelecionado);
+                }
+                
+                // Salvar
+                const salvou = await salvarDados();
+                
+                if (salvou) {
+                    fecharModal();
+                    renderizarCalendario();
+                }
+                
+            } catch (error) {
+                mostrarNotificacao('❌ ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Confirmar Agendamento';
             }
+        }
+        
+        function limparFormulario() {
+            document.getElementById('nome').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('endereco').value = '';
+            horarioSelecionado = null;
+        }
+        
+        // ==========================================
+        // PAINEL DO PASTOR
+        // ==========================================
+        
+        function fazerLogin() {
+            const senha = document.getElementById('senha').value;
             
-            const dateKey = cloudSystem.formatDateKey(selectedDate);
-            const memberData = { name, phone, address };
-            
-            const success = await cloudSystem.makeBooking(dateKey, selectedTime, memberData);
-            
-            if (success) {
-                closeMemberModal();
-                renderMemberCalendar();
-                clearMemberForm();
-            }
-        }
-        
-        function clearMemberForm() {
-            document.getElementById('member-name').value = '';
-            document.getElementById('member-phone').value = '';
-            document.getElementById('member-address').value = '';
-            selectedTime = null;
-        }
-        
-        function closeMemberModal() {
-            document.getElementById('member-modal').style.display = 'none';
-            document.getElementById('member-booking-form').style.display = 'none';
-            clearMemberForm();
-        }
-        
-        function cancelBooking() {
-            closeMemberModal();
-        }
-        
-        // ============================================
-        // FUNÇÕES DO PASTOR
-        // ============================================
-        
-        function checkPassword() {
-            const password = document.getElementById('pastor-password').value;
-            if (password === PASTOR_PASSWORD) {
-                pastorLoggedIn = true;
-                document.getElementById('pastor-login').style.display = 'none';
-                document.getElementById('pastor-content').style.display = 'block';
-                renderAllVisits();
-                updatePastorStats();
-                console.log('✅ Pastor autenticado com sucesso');
+            if (senha === CONFIG.senha) {
+                pastorLogado = true;
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('painel').style.display = 'block';
+                atualizarPainel();
+                mostrarNotificacao('✅ Login realizado', 'success');
             } else {
-                alert('❌ Senha incorreta! Acesso negado.');
-                document.getElementById('pastor-password').value = '';
+                mostrarNotificacao('❌ Senha incorreta', 'error');
+                document.getElementById('senha').value = '';
             }
         }
         
-        function checkEnter(event) {
-            if (event.key === 'Enter') {
-                checkPassword();
-            }
+        function sair() {
+            pastorLogado = false;
+            document.getElementById('login').style.display = 'block';
+            document.getElementById('painel').style.display = 'none';
+            document.getElementById('senha').value = '';
         }
         
-        function logout() {
-            pastorLoggedIn = false;
-            document.getElementById('pastor-login').style.display = 'block';
-            document.getElementById('pastor-content').style.display = 'none';
-            document.getElementById('pastor-password').value = '';
+        function atualizarPainel() {
+            // Contar estatísticas
+            let totalAgendamentos = 0;
+            let horariosLivres = 0;
+            
+            Object.keys(dados.agendamentos).forEach(data => {
+                totalAgendamentos += Object.keys(dados.agendamentos[data]).length;
+            });
+            
+            Object.keys(dados.horarios).forEach(data => {
+                horariosLivres += dados.horarios[data].length;
+            });
+            
+            // Atualizar interface
+            document.getElementById('total-agendamentos').textContent = totalAgendamentos;
+            document.getElementById('horarios-livres').textContent = horariosLivres;
+            document.getElementById('ultima-atualizacao').textContent = new Date().toLocaleTimeString('pt-BR');
+            
+            // Mostrar lista de agendamentos
+            mostrarAgendamentos();
         }
         
-        function renderAllVisits() {
-            const allVisitsList = document.getElementById('all-visits-list');
-            allVisitsList.innerHTML = '';
+        function mostrarAgendamentos() {
+            const lista = document.getElementById('lista-agendamentos');
+            lista.innerHTML = '';
             
-            const allVisits = [];
+            const todosAgendamentos = [];
             
-            // Converter dados para array
-            Object.keys(cloudSystem.cache.bookedVisits).forEach(dateKey => {
-                Object.keys(cloudSystem.cache.bookedVisits[dateKey]).forEach(time => {
-                    const visit = cloudSystem.cache.bookedVisits[dateKey][time];
-                    allVisits.push({
-                        date: dateKey,
-                        time: time,
-                        ...visit
+            // Coletar todos os agendamentos
+            Object.keys(dados.agendamentos).forEach(data => {
+                Object.keys(dados.agendamentos[data]).forEach(horario => {
+                    const agendamento = dados.agendamentos[data][horario];
+                    todosAgendamentos.push({
+                        data: data,
+                        horario: horario,
+                        ...agendamento
                     });
                 });
             });
             
             // Ordenar por data e hora
-            allVisits.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                if (dateA.getTime() === dateB.getTime()) {
-                    return a.time.localeCompare(b.time);
+            todosAgendamentos.sort((a, b) => {
+                if (a.data === b.data) {
+                    return a.horario.localeCompare(b.horario);
                 }
-                return dateA.getTime() - dateB.getTime();
+                return a.data.localeCompare(b.data);
             });
             
-            if (allVisits.length > 0) {
-                allVisits.forEach(visit => {
-                    const visitCard = document.createElement('div');
-                    visitCard.className = 'visit-card';
-                    
-                    const visitDate = new Date(visit.date);
-                    const formattedDate = visitDate.toLocaleDateString('pt-BR', {
-                        weekday: 'long',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
-                    
-                    visitCard.innerHTML = `
-                        <div class="visit-date">${formattedDate}</div>
-                        <div style="font-weight: 600; color: #28a745; font-size: 1.1em; margin-bottom: 10px;">⏰ ${visit.time}</div>
-                        <div style="margin-bottom: 15px;">
-                            <div><strong>👤 Nome:</strong> ${visit.name}</div>
-                            <div><strong>📞 Telefone:</strong> ${visit.phone}</div>
-                            <div><strong>🏠 Endereço:</strong> ${visit.address}</div>
-                            <div><strong>📅 Agendado em:</strong> ${new Date(visit.dataAgendamento).toLocaleString('pt-BR')}</div>
-                        </div>
-                        <div style="margin-top: 15px;">
-                            <a href="tel:${visit.phone}" class="contact-btn phone-btn">📞 Ligar</a>
-                            <a href="https://wa.me/55${visit.phone.replace(/\D/g, '')}" class="contact-btn whatsapp-btn" target="_blank">💬 WhatsApp</a>
-                            <a href="https://maps.google.com/?q=${encodeURIComponent(visit.address)}" class="contact-btn maps-btn" target="_blank">📍 Localização</a>
-                        </div>
-                    `;
-                    
-                    allVisitsList.appendChild(visitCard);
-                });
-            } else {
-                allVisitsList.innerHTML = '<div style="text-align: center; color: #666; padding: 30px; font-style: italic;">Nenhuma visita agendada ainda.</div>';
-            }
-        }
-        
-        function updatePastorStats() {
-            // Contar visitas
-            let totalVisits = 0;
-            Object.keys(cloudSystem.cache.bookedVisits).forEach(date => {
-                totalVisits += Object.keys(cloudSystem.cache.bookedVisits[date]).length;
-            });
-            
-            // Contar horários disponíveis
-            let availableSlots = 0;
-            Object.keys(cloudSystem.cache.availableSlots).forEach(date => {
-                availableSlots += cloudSystem.cache.availableSlots[date].length;
-            });
-            
-            // Atualizar interface
-            const totalElement = document.getElementById('total-visits');
-            const slotsElement = document.getElementById('available-slots');
-            
-            if (totalElement) totalElement.textContent = totalVisits;
-            if (slotsElement) slotsElement.textContent = availableSlots;
-            
-            cloudSystem.updateLastSync();
-        }
-        
-        function liberarHorarios() {
-            if (!pastorLoggedIn) {
-                alert('❌ Acesso negado');
+            if (todosAgendamentos.length === 0) {
+                lista.innerHTML = '<p style="text-align: center; padding: 30px; color: #666; font-style: italic;">Nenhum agendamento ainda</p>';
                 return;
             }
             
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.8); z-index: 10000; display: flex;
-                align-items: center; justify-content: center;
-            `;
-            
-            modal.innerHTML = `
-                <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%;">
-                    <h3 style="margin-bottom: 20px; color: #2c3e50;">📅 Liberar Horários</h3>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Data:</label>
-                        <input type="date" id="release-date" min="${new Date().toISOString().split('T')[0]}" 
-                               style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;">
-                    </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Horários (Ctrl+Click para múltiplos):</label>
-                        <select id="release-times" multiple size="8" 
-                                style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;">
-                            <option value="14:00">14:00</option>
-                            <option value="14:30">14:30</option>
-                            <option value="15:00">15:00</option>
-                            <option value="15:30">15:30</option>
-                            <option value="16:00">16:00</option>
-                            <option value="16:30">16:30</option>
-                            <option value="17:00">17:00</option>
-                            <option value="17:30">17:30</option>
-                            <option value="18:00">18:00</option>
-                            <option value="18:30">18:30</option>
-                            <option value="19:00">19:00</option>
-                            <option value="19:30">19:30</option>
-                            <option value="20:00">20:00</option>
-                            <option value="20:30">20:30</option>
-                            <option value="21:00">21:00</option>
-                        </select>
-                    </div>
-                    
-                    <div style="text-align: center;">
-                        <button onclick="confirmarLiberacao()" style="background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 8px; margin-right: 10px; cursor: pointer; font-weight: 600;">✅ Liberar</button>
-                        <button onclick="fecharModalLiberacao()" style="background: #6c757d; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600;">❌ Cancelar</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            window.liberacaoModal = modal;
-        }
-        
-        async function confirmarLiberacao() {
-            const date = document.getElementById('release-date').value;
-            const timeSelect = document.getElementById('release-times');
-            const selectedTimes = Array.from(timeSelect.selectedOptions).map(option => option.value);
-            
-            if (!date || selectedTimes.length === 0) {
-                alert('❌ Selecione data e pelo menos um horário');
-                return;
-            }
-            
-            const success = await cloudSystem.releaseTimeSlots(date, selectedTimes);
-            
-            if (success) {
-                fecharModalLiberacao();
-                renderMemberCalendar();
-                updatePastorStats();
-            }
-        }
-        
-        function fecharModalLiberacao() {
-            if (window.liberacaoModal) {
-                document.body.removeChild(window.liberacaoModal);
-                window.liberacaoModal = null;
-            }
-        }
-        
-        async function refreshData() {
-            await cloudSystem.loadFromCloud();
-            cloudSystem.refreshInterface();
-            cloudSystem.showNotification('🔄 Dados atualizados!');
-        }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Inicializando sistema...');
-            
-            // Aguardar carregamento inicial dos dados
-            setTimeout(() => {
-                renderMemberCalendar();
+            // Criar cards dos agendamentos
+            todosAgendamentos.forEach(agendamento => {
+                const card = document.createElement('div');
+                card.className = 'visita-card';
                 
-                // Verificar se ainda está carregando
-                const syncInfo = document.getElementById('sync-info');
-                if (!cloudSystem.isOnline && syncInfo) {
-                    syncInfo.style.display = 'block';
-                }
-            }, 2000);
-            
-            console.log('✅ Sistema inicializado');
+                const dataFormatada = new Date(agendamento.data + 'T00:00:00').toLocaleDateString('pt-BR', {
+                    weekday: 'long',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                card.innerHTML = `
+                    <div class="visita-data">${dataFormatada}</div>
+                    <div style="font-weight: 600; color: #28a745; font-size: 18px; margin-bottom: 15px;">
+                        ⏰ ${agendamento.horario}
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <div><strong>👤 Nome:</strong> ${agendamento.nome}</div>
+                        <div><strong>📞 Telefone:</strong> ${agendamento.telefone}</div>
+                        <div><strong>🏠 Endereço:</strong> ${agendamento.endereco}</div>
+                        <div><strong>📅 Agendado:</strong> ${new Date(agendamento.dataAgendamento).toLocaleString('pt-BR')}</div>
+                    </div>
+                    <div>
+                        <a href="tel:${agendamento.telefone}" class="contato-btn telefone">📞 Ligar</a>
+                        <a href="https://wa.me/55${agendamento.telefone.replace(/\D/g, '')}" class="contato-btn whatsapp" target="_blank">💬 WhatsApp</a>
+                        <a href="https://maps.google.com/?q=${encodeURIComponent(agendamento.endereco)}" class="contato-btn mapa" target="_blank">📍 Localização</a>
+                    </div>
+                `;
+                
+                lista.appendChild(card);
+            });
+        }
+        
+        async function atualizarDados() {
+            mostrarNotificacao('🔄 Atualizando dados...', 'warning');
+            await carregarDados();
+            if (pastorLogado) {
+                atualizarPainel();
+            }
+        }
+        
+        // ==========================================
+        // UTILITÁRIOS
+        // ==========================================
+        
+        function formatarData(data) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+        
+        // Máscara de telefone
+        document.addEventListener('DOMContentLoaded', function() {
+            const telefone = document.getElementById('telefone');
+            if (telefone) {
+                telefone.addEventListener('input', function(e) {
+                    let valor = e.target.value.replace(/\D/g, '');
+                    
+                    if (valor.length <= 11) {
+                        if (valor.length <= 10) {
+                            valor = valor.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+                        } else {
+                            valor = valor.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                        }
+                    }
+                    
+                    e.target.value = valor;
+                });
+            }
+        });
+        
+        // Enter no campo de senha
+        document.addEventListener('DOMContentLoaded', function() {
+            const senha = document.getElementById('senha');
+            if (senha) {
+                senha.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        fazerLogin();
+                    }
+                });
+            }
         });
         
         // Fechar modal clicando fora
         window.onclick = function(event) {
-            const memberModal = document.getElementById('member-modal');
-            if (event.target === memberModal) {
-                closeMemberModal();
-            }
-            
-            if (event.target === window.liberacaoModal) {
-                fecharModalLiberacao();
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                fecharModal();
             }
         }
         
-        // Navegação de mês (se necessário)
-        function changeMonth(direction) {
-            currentMonth.setMonth(currentMonth.getMonth() + direction);
-            renderMemberCalendar();
-        }
+        // ==========================================
+        // INICIALIZAÇÃO
+        // ==========================================
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Iniciando sistema da Igreja Adventista');
+            console.log('📍 Repositório: Barcelos50/agendamento-visitas-pastorais');
+            
+            // Carregar dados iniciais
+            await carregarDados();
+            
+            // Auto-atualizar a cada 2 minutos
+            setInterval(async () => {
+                console.log('🔄 Sincronização automática...');
+                await carregarDados();
+            }, 120000);
+            
+            console.log('✅ Sistema inicializado com sucesso!');
+        });
+        
+        // ==========================================
+        // LOG DE FUNCIONAMENTO
+        // ==========================================
+        
+        console.log(`
+🏛️ SISTEMA DE AGENDAMENTO PASTORAL
+📍 Igreja Adventista do Sétimo Dia - Passo Fundo/RS
+👨‍💼 Pr. Carlos Barcelos
+
+🔧 CONFIGURAÇÃO:
+   • Usuário GitHub: ${CONFIG.usuario}
+   • Repositório: ${CONFIG.repositorio}
+   • Arquivo de dados: ${CONFIG.arquivo}
+
+📋 FUNCIONALIDADES:
+   ✅ Agendamento em tempo real
+   ✅ Prevenção de conflitos
+   ✅ Painel administrativo
+   ✅ Sincronização automática
+   ✅ Interface responsiva
+
+🔐 ACESSO PASTOR:
+   • Senha: ${CONFIG.senha}
+        `);
     </script>
 </body>
 </html>
