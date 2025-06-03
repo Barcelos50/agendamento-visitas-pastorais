@@ -1,0 +1,8 @@
+.env
+.env.local
+.env.production
+config/secrets.php
+vendor/
+node_modules/
+*.log
+secrets/
